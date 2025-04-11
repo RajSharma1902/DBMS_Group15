@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>Admin Dashboard</h2>
+<div class="row mt-4">
+  <div class="col-md-4">
+    <div class="card text-bg-primary">
+      <div class="card-body">
+        <h5 class="card-title">Total Rooms</h5>
+        <p class="card-text">{{ room_count }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-bg-success">
+      <div class="card-body">
+        <h5 class="card-title">Total Guests</h5>
+        <p class="card-text">{{ guest_count }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-bg-warning">
+      <div class="card-body">
+        <h5 class="card-title">Bookings</h5>
+        <p class="card-text">{{ booking_count }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

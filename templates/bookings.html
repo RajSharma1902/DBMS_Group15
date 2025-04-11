@@ -1,0 +1,172 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h2>Bookings</h2>
+
+<!-- Add Booking Form -->
+<h4>Add Booking</h4>
+<form method="POST" action="/add_booking" class="mb-5">
+  <div class="form-group mb-3">
+    <label for="guest_id">Guest</label>
+    <select name="guest_id" class="form-control select2" required>
+      <option value="" disabled selected>Select Guest</option>
+      {% for guest in guests %}
+      <option value="{{ guest.id }}">{{ guest.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="form-group mb-3">
+    <label for="room_id">Room</label>
+    <select name="room_id" class="form-control select2" required>
+      <option value="" disabled selected>Select Room</option>
+      {% for room in rooms %}
+      <option value="{{ room.id }}">Room {{ room.room_number }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="form-group mb-3">
+    <label for="check_in">Check-In</label>
+    <input type="date" name="check_in" class="form-control" required>
+  </div>
+
+  <div class="form-group mb-3">
+    <label for="check_out">Check-Out</label>
+    <input type="date" name="check_out" class="form-control" required>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Add Booking</button>
+</form>
+
+<!-- Existing Bookings Table -->
+<table class="table table-bordered table-hover">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Guest</th>
+      <th>Room</th>
+      <th>Check-In</th>
+      <th>Check-Out</th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for booking in bookings %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ booking.guest_name }}</td>
+      <td>{{ booking.room_number }}</td>
+      <td>{{ booking.check_in }}</td>
+      <td>{{ booking.check_out }}</td>
+      <td>{{ booking.status }}</td>
+      <td>
+        <button class="btn btn-sm btn-warning edit-btn"
+                data-bs-toggle="modal"
+                data-bs-target="#editBookingModal"
+                data-id="{{ booking.id }}"
+                data-guest="{{ booking.guest_id }}"
+                data-room="{{ booking.room_id }}"
+                data-checkin="{{ booking.check_in }}"
+                data-checkout="{{ booking.check_out }}">
+          Edit
+        </button>
+        <a href="/cancel-booking/{{ booking.id }}" class="btn btn-sm btn-danger"
+           onclick="return confirm('Are you sure you want to cancel this booking?');">Cancel</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- Edit Booking Modal -->
+<div class="modal fade" id="editBookingModal" tabindex="-1" aria-labelledby="editBookingModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" id="editBookingForm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Booking</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group mb-3">
+            <label for="edit_guest">Guest</label>
+            <select name="guest_id" id="edit_guest" class="form-control select2" required>
+              {% for guest in guests %}
+              <option value="{{ guest.id }}">{{ guest.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group mb-3">
+            <label for="edit_room">Room</label>
+            <select name="room_id" id="edit_room" class="form-control select2" required>
+              {% for room in rooms %}
+              <option value="{{ room.id }}">Room {{ room.room_number }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group mb-3">
+            <label for="edit_checkin">Check-In</label>
+            <input type="date" name="check_in" id="edit_checkin" class="form-control" required>
+          </div>
+
+          <div class="form-group mb-3">
+            <label for="edit_checkout">Check-Out</label>
+            <input type="date" name="check_out" id="edit_checkout" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Update Booking</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  $(document).ready(function() {
+    // Init Select2 normally for form outside modal
+    $('.select2').select2({
+      width: '100%',
+      placeholder: 'Search or select',
+      allowClear: true
+    });
+
+    // When modal opens, re-init select2 inside it and populate data
+    $('#editBookingModal').on('shown.bs.modal', function (e) {
+      // Make sure modal selects are initialized
+      $('#edit_guest').select2({ dropdownParent: $('#editBookingModal'), width: '100%' });
+      $('#edit_room').select2({ dropdownParent: $('#editBookingModal'), width: '100%' });
+
+      // Get data from clicked button
+      const button = $(e.relatedTarget);
+      const id = button.data('id');
+      const guest = button.data('guest');
+      const room = button.data('room');
+      const checkin = button.data('checkin');
+      const checkout = button.data('checkout');
+
+      // Set values
+      $('#edit_guest').val(guest).trigger('change');
+      $('#edit_room').val(room).trigger('change');
+      $('#edit_checkin').val(checkin);
+      $('#edit_checkout').val(checkout);
+
+      // Update form action
+      $('#editBookingForm').attr('action', '/update_booking/' + id);
+    });
+  });
+</script>
+
+{% endblock %}

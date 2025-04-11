@@ -1,0 +1,153 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h2>Rooms</h2>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="alert alert-info">{{ messages[0] }}</div>
+  {% endif %}
+{% endwith %}
+
+<!-- Add Room Form -->
+<h4>Add Room</h4>
+<form method="POST" action="/add_room" class="mb-5">
+  <div class="form-group mb-3">
+    <label>Room Number</label>
+    <input type="text" name="room_number" class="form-control" required>
+  </div>
+
+  <div class="form-group mb-3">
+    <label>Room Type</label>
+    <select name="room_type_id" class="form-control select2" required>
+      <option value="">Select Room Type</option>
+      {% for type in room_types %}
+      <option value="{{ type.id }}">{{ type.type_name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="form-group mb-3">
+    <label>Price Per Night</label>
+    <input type="number" step="0.01" name="price" class="form-control" required>
+  </div>
+
+  <button type="submit" class="btn btn-primary">Add Room</button>
+</form>
+
+<!-- Rooms Table -->
+<table class="table table-bordered table-hover">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Room No</th>
+      <th>Type</th>
+      <th>Status</th>
+      <th>Price</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for room in rooms %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ room.room_number }}</td>
+      <td>{{ room.type_name }}</td>
+      <td>{{ room.status }}</td>
+      <td>₹{{ room.price_per_night }}</td>
+      <td>
+        <button class="btn btn-sm btn-warning edit-btn"
+                data-bs-toggle="modal"
+                data-bs-target="#editRoomModal"
+                data-id="{{ room.id }}"
+                data-number="{{ room.room_number }}"
+                data-type="{{ room.room_type_id }}"
+                data-price="{{ room.price_per_night }}">
+          Edit
+        </button>
+      
+        {% if room.status == 'available' %}
+          <a href="/delete-room/{{ room.id }}" class="btn btn-sm btn-danger"
+             onclick="return confirm('Are you sure you want to delete this room?');">Delete</a>
+        {% else %}
+          <button class="btn btn-sm btn-secondary" disabled title="Room is not deletable due to active bookings.">Delete</button>
+        {% endif %}
+      </td>      
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- Edit Room Modal -->
+<div class="modal fade" id="editRoomModal" tabindex="-1" aria-labelledby="editRoomModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" id="editRoomForm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Room</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group mb-3">
+            <label>Room Number</label>
+            <input type="text" name="room_number" id="edit_room_number" class="form-control" required>
+          </div>
+
+          <div class="form-group mb-3">
+            <label>Room Type</label>
+            <select name="room_type_id" id="edit_room_type" class="form-control select2" required>
+              {% for type in room_types %}
+              <option value="{{ type.id }}">{{ type.type_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group mb-3">
+            <label>Price Per Night</label>
+            <input type="number" step="0.01" name="price" id="edit_price" class="form-control" required>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Update Room</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  $(document).ready(function () {
+    $('.select2').select2({
+      width: '100%',
+      placeholder: 'Search or select',
+      allowClear: true
+    });
+
+    $('#editRoomModal').on('shown.bs.modal', function (e) {
+      $('#edit_room_type').select2({ dropdownParent: $('#editRoomModal'), width: '100%' });
+
+      const button = $(e.relatedTarget);
+      const id = button.data('id');
+      const roomnumber = button.data('roomnumber');
+      const typeid = button.data('typeid');
+      const price = button.data('price');
+
+      $('#edit_room_number').val(roomnumber);
+      $('#edit_price').val(price);
+      $('#edit_room_type').val(typeid).trigger('change');
+
+      $('#editRoomForm').attr('action', '/update_room/' + id);
+    });
+  });
+</script>
+
+{% endblock %}

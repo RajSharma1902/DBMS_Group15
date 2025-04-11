@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>Payments</h2>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Booking ID</th>
+      <th>Guest</th>
+      <th>Amount</th>
+      <th>Status</th>
+      <th>Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for payment in payments %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ payment.booking_id }}</td>
+      <td>{{ payment.guest_name }}</td>
+      <td>₹{{ payment.amount }}</td>
+      <td>
+        {% if payment.status == 'Paid' %}
+          <span class="badge bg-success">Paid</span>
+        {% else %}
+          <span class="badge bg-danger">Pending</span>
+        {% endif %}
+      </td>
+      <td>{{ payment.payment_date }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2>Guest Feedback</h2>
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Guest</th>
+      <th>Message</th>
+      <th>Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for feedback in feedbacks %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ feedback.guest_name }}</td>
+      <td>{{ feedback.message }}</td>
+      <td>{{ feedback.submitted_on }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
